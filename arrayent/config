@@ -1,0 +1,11 @@
+# Where is our LTIB home
+#LTIB_ROOTFS := /home/dustin/arrayent/whirlpool/atlas/ltib.cvs/rootfs
+
+# What is our cross compiler prefix
+#CROSS_COMPILE := /opt/freescale/usr/local/gcc-4.1.2-glibc-2.5-nptl-3/arm-none-linux-gnueabi/bin/arm-none-linux-gnueabi-
+
+# Where is our compiler
+CC := $(CROSS_COMPILE)gcc
+LD := $(CROSS_COMPILE)ld
+AS := $(CROSS_COMPILE)as
+AR := $(CROSS_COMPILE)ar

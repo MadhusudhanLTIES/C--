@@ -1,0 +1,144 @@
+/**
+ * @File   client.c
+ * @Brief  Test application for Arrayent server interface.
+ *
+ * Copyright (c) 2012 Arrayent Inc.  Company confidential.
+ * Please contact sales@arrayent.com to get permission to use in your
+ * application.
+ */
+#include <stdio.h>
+#include <stdlib.h>
+#include <errno.h>
+#include <semaphore.h>
+#include <time.h>
+
+#include "aic.h"
+
+static int token;
+static sem_t callbackSem;
+
+// Initial login ID to the server
+#define DEFAULT_LOGIN    "dhmdebug"
+// Max time to wait for callback
+#define CALLBACK_TIMEOUT 10 /* Sec */
+
+void bailout(int loop)
+{
+	fprintf(stderr, "\nFAILED in loop %d\n", loop);
+	exit(EXIT_FAILURE);
+}
+
+void callback(int *handle, int status)
+{
+	if(token != (int)handle) {
+		printf("Bad callback handle ID %d", token);
+		bailout(0);
+	} else if (status != 0){
+		printf("Bad callback status %d", status);
+		bailout(0);
+	} else {
+		sem_post(&callbackSem);
+	}
+}
+
+#define RANDOM_LEN() ((rand() % 254) + 1)
+
+int main(int argc, char** argv)
+{
+	int arg;
+	int i=0;
+	int ret, len;
+	char buf[255];
+	struct timespec ts;
+
+	// Init the semaphores and queues;
+	if(sem_init(&callbackSem, 0, 1) < 0) {
+		perror("Error initializing list semaphore");
+		exit(EXIT_FAILURE);
+	}
+	// Initialize connection
+	printf("Starting connection to Arrayent daemon... ");
+	if(ArrayentInit() < 0) {
+		printf("\nConnection to Arrayent daemon failed");
+        bailout(i);
+	} else {
+		printf("success\n");
+	}
+#if 0
+	// Get network status from server
+	printf("Getting network status from Arrayent daemon...");
+	if(ArrayentNetStatus(&arg) < 0) {
+		printf("\nConnection to Arrayent daemon failed");
+		bailout(i);
+	} else {
+		printf("success\n");
+		printf("Net status 0x%02x\n", (unsigned char)arg);
+	}
+	// Reset the login ID
+	printf("Sending new login ID to Arrayent daemon...");
+	if(ArrayentSetCredentials(DEFAULT_LOGIN, DEFAULT_LOGIN) < 0) {
+		printf("\nConnection to Arrayent daemon failed");
+		bailout(i);
+	} else {
+		printf("success\n");
+	}
+	// Reset the connection
+	printf("Resetting connection to Arrayent daemon... ");
+	if(ArrayentReset() < 0) {
+		printf("\nReset for the Arrayent daemon failed");
+        bailout(i);
+	} else {
+		printf("success\n");
+	}
+#endif
+	// Get network status from server
+	do {
+		printf("Waiting for network status from Arrayent daemon...");
+		if(ArrayentNetStatus(&arg) < 0) {
+			printf("\nConnection to Arrayent daemon failed");
+			bailout(i);
+		} else {
+			printf(" status 0x%02x\n", (unsigned char)arg);
+		}
+		sleep(1);
+	} while((arg & ARRAYENT_SERVER_CONNECTED) == 0);
+
+	for(i=0;;i++) {
+		printf("\nLoop %d\n=========================================\n", i);
+		// Receive any binary data
+		printf("Waiting to receive new binary data from Arrayent daemon... ");
+		do {
+			len = sizeof(buf);
+			ret = ArrayentRecvData(buf, &len, -1);
+			if(ret < 0) {
+				if(ret == -ETIMEDOUT) {
+					printf("timeout (expected)\n");
+				} else {
+					printf("\nConnection to Arrayent daemon failed");
+					bailout(i);
+				}
+			} else {
+				printf("success\n");
+			}
+		} while(len > 0);
+		// Receive any property data
+		printf("Waiting to receive new property data from Arrayent daemon... ");
+		do {
+			len = sizeof(buf);
+			ret = ArrayentRecvData(buf, &len, -1);
+			if(ret < 0) {
+				if(ret == -ETIMEDOUT) {
+					printf("timeout (expected)\n");
+				} else {
+					printf("\nConnection to Arrayent daemon failed");
+					bailout(i);
+				}
+			} else {
+				printf("success: %s\n", buf);
+			}
+		} while(len > 0);
+
+		printf("SUCCESS\n=========================================\n");
+	}
+
+}

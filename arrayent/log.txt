@@ -1,0 +1,19 @@
+<WPR33336L6L> Starting connection to Arrayent daemon...
+------------------->   |11|
+Waiting for network status from Arrayent daemon...
+   status: 0x00aa
+success hello: 0
+<WPR33336L6L> Connection to Arrayent daemon sucessful.
+sys-productid set to 1
+Data from the cloud (-110): 
+<WPR33336L6L> Sending packet 0000ED0006E72100000102
+<WPR33336L6L> Packet sent sucessfully
+Data from the cloud (-110): 
+<WPR33336L6L> Sending packet 0000ED0006E72100000102
+<WPR33336L6L> Packet sent sucessfully
+Data from the cloud (-110): 
+<WPR33336L6L> Sending packet 0000ED0006E72100000102
+<WPR33336L6L> Packet sent sucessfully
+Data from the cloud (-110): 
+<WPR33336L6L> Sending packet 0000ED0006E72100000102
+<WPR33336L6L> Packet sent sucessfully

@@ -1,0 +1,398 @@
+//#include <iostream>
+#include <stdio.h>
+#include "string.h"
+#pragma pack(1)
+//using namespace std;
+
+typedef struct REVELATION_PACKET_STRUCT
+{
+	unsigned short transactionId;
+	unsigned char header_byte;
+	unsigned short msg_length;
+	unsigned char reveal_api;
+	unsigned char reveal_opcode;
+	unsigned char payload[];
+}REVELATION_PACKET;
+
+char* asciiToHexString(unsigned char* in ,unsigned char* out)
+{
+
+	out = (char*) malloc((int)strlen(in)*2);
+	char hexChars[] = "0123456789ABCDEF";
+	int iii = 0;
+	while(1) 
+	{
+		if(in[iii] == 0)
+		{
+			out[2*iii] = 0;
+			break;
+		}
+		else
+		{
+			char letter = in[iii];
+			out[2*iii] = hexChars[(char)((letter >> 4) & 0x0f)];
+			out[2*iii + 1] = hexChars[(char)(letter & 0x0f)];
+			iii++;
+		}
+	}
+	return out;
+}
+
+
+/*typedef struct REVELATION_PACKET_STRUCT
+{
+	signed short transactionId;
+	unsigned char header_byte;
+	signed short msg_length;
+	unsigned char reveal_api;
+	unsigned char reveal_opcode;
+	unsigned char payload[];
+}REVELATION_PACKET;
+
+enum REVEAL_API
+{
+	ECM_INFO=0xE3
+};
+
+enum REVEAL_OPCODE
+{
+	GET_COMM_MODULE_INFO=0x02,
+	GET_BOARD_INFO=0x03
+};
+
+const char *brand = "01";
+const char *category = "06";
+const char *modelNumber = "WEL98HEBU0";
+const char *serialNumber="21901031";
+const char *macAddress="88:e7:12:00:27:7b";
+
+
+int sizeOfString(char* testString)
+{
+	return (sizeof(testString) / sizeof(char)) ;
+}
+
+char* binaryToHexString(unsigned char* inputData, char* outputData, int length)
+{
+
+	printf("Out of conv");
+	//fflush(stdout);
+	char hexChars[] = "0123456789ABCDEF";
+	int index;
+	int hexValues[length/2];
+	
+	for(index = 0; index <= length; index++) 
+	{
+		char char1 = hexChars[((inputData[index] & 0xf0) >> 4)];
+		char char2 = hexChars[(inputData[index] & 0x0f)];
+		outputData[index*2] = char1;
+		outputData[index*2+1] = char2;
+		outputData[index*2+2] = 0;
+		//hexValues[index]= outputData[index*2]>>4 |outputData[index*2+1];
+
+		//printf("%x ::",inputData[index]);
+
+
+	}
+	printf("Out of conv");
+	outputData[2*length] = 0;
+	return outputData;
+}
+
+char* hexStringToBinary(char* inputData, char* outputData, int* length)
+{
+	int index;
+	int size = 0;
+	for(index = 0; 1; index += 2)
+	{
+		if(inputData[index] == 0)
+		{
+			break;
+		}
+		size++;
+		char char1 = inputData[index];
+		char char2 = inputData[index+1];
+		if(char1 >= 48 && char1 <= 57) 
+		{
+			char1 -= 48;
+		}
+		else if(char1 >= 65 && char1 <= 90) 
+		{
+			char1 -= 55;
+		}
+		if(char2 >= 48 && char2 <= 57) 
+		{
+			char2 -= 48;
+		}
+		else if(char2 >= 65 && char2 <= 90)
+		{
+			char2 -= 55;
+		}
+		outputData[index/2] = char1 << 4 | char2;
+	}
+	*length = size - 1;
+	return outputData;
+}
+
+char* asciiToHexString(char* in, char* out)
+{
+	char hexChars[] = "0123456789ABCDEF";
+	int iii = 0;
+	while(1) 
+	{
+		if(in[iii] == 0)
+		{
+			out[2*iii] = 0;
+			break;
+		}
+		else
+		{
+			char letter = in[iii];
+			out[2*iii] = hexChars[(char)((letter >> 4) & 0x0f)];
+			out[2*iii + 1] = hexChars[(char)(letter & 0x0f)];
+			iii++;
+		}
+	}
+	return out;
+}
+
+char* AsciiToHexString(char* in)
+{
+	char *out = (char*) malloc((int)strlen(in)*2);	
+	char hexChars[] = "0123456789ABCDEF";
+	int iii = 0;
+	while(1) 
+	{
+		if(in[iii] == 0)
+		{
+			out[2*iii] = 0;
+			break;
+		}
+		else
+		{
+			char letter = in[iii];
+			out[2*iii] = hexChars[(char)((letter >> 4) & 0x0f)];
+			out[2*iii + 1] = hexChars[(char)(letter & 0x0f)];
+			iii++;
+		}
+	}
+	return out;
+}
+
+char* PublishDeviceInformation(unsigned short transId, char* said)
+{
+	
+	char category[] = "06";
+	
+	//this is the said
+	//char uniqueID[] = "0000000000000000000000";
+	//strcpy(uniqueID,asciiToHexString(said,tmp));
+	//strcpy(uniqueID,asciiToHexString("WPR33336L6L",tmp));
+  	
+	char *uniqueID = AsciiToHexString(said);
+	char *modelNumber = AsciiToHexString("WEL98HEBU0");
+	
+	char *serialNumber= AsciiToHexString("21901031");
+	
+	char *macAddress = AsciiToHexString("88:e7:12:00:27:7b");
+	
+	char gdiSecondPart[] = "E321";
+
+	char *result;
+	
+	int size =(int)(strlen(gdiSecondPart)+strlen(brand)+strlen(category)+strlen(uniqueID)+strlen(modelNumber)+strlen(serialNumber)+strlen(macAddress));
+
+		result= (char*) malloc(size+(int)sizeof(unsigned short)+6);
+		char * tid;		
+		//memcpy(tid, (char*)&transId, 2);
+	    	strcat(result,tid);
+    		strcat(result,"ED");
+		size = (int) size/2;
+		size+=3;
+		//printf("%d Size \n",size);
+		char length[2];
+		//Convert length to binary
+		length[0] = (char)((size & 0xffff0000) >> 8);
+		length[1] = (char)(size & 0x0000ffff);
+    		
+		//printf("Data :%s\n",result);
+		//Convert binary length to hex (so it can be concatinated with string)
+		char tmp[16];
+		binaryToHexString(length,tmp,2);
+    
+		strcat(result,tmp);
+printf("Data :%s",result);
+		strcat(result,gdiSecondPart);
+printf("Data :%s",result);
+		strcat(result,brand);
+printf("Data :%s",result);
+		strcat(result,category);
+printf("Data :%s",result);
+		strcat(result,uniqueID);
+printf("Data :%s",result);
+		strcat(result,modelNumber);
+		strcat(result,"00"); //append \0 to end of modelNumber
+printf("Data :%s",result);
+		strcat(result,serialNumber);
+		strcat(result,"00"); //append \0 to end of serialNumber
+printf("Data :%s",result);
+		strcat(result,macAddress);
+		strcat(result,"00");  //append \0 to end of message
+		
+		printf("Data :%s",result);
+	
+	return result;
+}
+
+char* GetDeviceInformation(unsigned short transId, unsigned char opcode,char* said)
+{
+	char *result;
+	//char test[1024];
+	char tmp[1024];
+	char length[] = "0000";
+	char gdiSecondPart[] = "E321";
+	
+	char brand[] = "01";
+  	 
+	switch(opcode)
+	{
+		case GET_COMM_MODULE_INFO:
+			result=PublishDeviceInformation(transId,said);
+		
+		break;
+		default : break;
+	}
+
+	return result;	
+}
+
+
+char* GetCommunicationModuleInformation()
+{
+	char tmp[1024];
+	char boardPartNumber[] = "000000000000000000";
+	strcpy(boardPartNumber,asciiToHexString("W00000001",tmp));
+
+	char boardRevisionNumber[] = "00";
+	strcpy(boardRevisionNumber,asciiToHexString("1",tmp));
+
+	char projectReleaseNumber[] = "000000000000000000";
+	strcpy(projectReleaseNumber,asciiToHexString("W10605695",tmp));
+	char result[1024];
+	result[0]=0;	
+	char gcmFirstPart[] = "0000ED0018E322";
+	strcat(result,gcmFirstPart);
+	strcat(result,boardPartNumber);
+	strcat(result,"00");
+	strcat(result,boardRevisionNumber);
+	strcat(result,"00");
+	strcat(result,projectReleaseNumber);
+	strcat(result,"00");
+
+	//printf("<%s> DeviceINformation ", result);
+	return result;
+}
+
+//Take a packet (ASCII Hex), look at bits, decide if there needs to be a response
+//and then send the appropriate response
+void sniff(unsigned char* packet, char* said) 
+{
+	char truePacket[1024];
+	//char buff[1024];
+	char tmp[1024];
+	char message[1024];
+	
+	REVELATION_PACKET *revealPacket;
+	revealPacket = (REVELATION_PACKET *) packet;
+	int messageLength = 0;
+	int len;
+	char* deviceInfo ;
+	switch(revealPacket->reveal_api)
+	{
+		case ECM_INFO:	deviceInfo = GetDeviceInformation(revealPacket->transactionId,revealPacket->reveal_opcode,said);
+				
+				//hexStringToBinary(deviceInfo,message,&messageLength);
+
+				/*if(ArrayentSendData(message, messageLength+1, 10000) < 0) 
+				{
+					printf("<%s> Could not send message\n",said);
+				}*/
+				//break;
+		//default:break;
+	//}
+  
+	/*if(strcmp(truePacket,DeviceInformation) == 0)
+	{
+		
+	
+		//char* deviceInfo= GetDeviceInformation(gdiFirstPart,said);
+    
+		//printf("Inside Sniffer %s",deviceInfo);
+		int messageLength = 0;
+    
+		printf("<%s> Sending message: %s\n",said,deviceInfo);
+
+		hexStringToBinary(deviceInfo,message,&messageLength);
+
+		if(ArrayentSendData(message, messageLength+1, 10000) < 0) 
+		{
+			printf("<%s> Could not send message\n",said);
+		}
+  
+    	
+	}
+
+	  else if(strcmp(truePacket,GetCommModuleInformation) == 0) 
+	  {
+		char *devCommInfo=GetCommunicationModuleInformation();
+    
+		int messageLength = 0;
+    
+		printf("<%s> Sending message: %s\n",said,devCommInfo);
+
+		hexStringToBinary(devCommInfo,message,&messageLength);
+
+		if(ArrayentSendData(message, messageLength + 1, 10000) < 0)
+		{
+		  printf("<%s> Could not send message\n",said);
+		}
+
+	}
+}*/
+
+int main()
+{
+
+	//char uniqueID[] = "0000000000000000000000";
+	unsigned char *uniqueID,*tmp;
+	//strcpy(uniqueID,asciiToHexString("MADHU",uniqueID));
+	asciiToHexString("MADHU",uniqueID);
+	printf("%s",uniqueID[0]);
+	unsigned char data[9]={0x36, 0x00,0xed,0x00,0x02,0xe3,0x02,0x01,0x02};
+	//sniff(data,"MADHU");
+	unsigned char test[]="3600ed0002";
+	printf("%s Test Data ",test);
+ 	REVELATION_PACKET *revealPacket;
+	//memcpy((char *)&revealPacket, data, sizeof(revealPacket));
+        //memcpy(&revealPacket, (REVELATION_PACKET *)data, sizeof(revealPacket));
+        revealPacket = (REVELATION_PACKET *)data;
+	/*printf("Tranid {%x}\n",revealPacket->transactionId);
+	printf("headerbyte {%x}\n",revealPacket->header_byte);
+	printf("msglenth {%x}\n",revealPacket->msg_length);
+	printf("api {%x}\n",revealPacket->reveal_api);
+	printf("opcode {%x}\n",revealPacket->reveal_opcode);
+	
+	tmp=(unsigned char*) revealPacket;
+
+	int i=0;
+
+	while(i<9)
+	{
+		printf("%x:",tmp[i++]);
+	}*/
+	
+	
+
+
+	return 0;
+}

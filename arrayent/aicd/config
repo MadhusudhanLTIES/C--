@@ -1,0 +1,15 @@
+#
+# Copyright (C) 2010-, Marvell International Ltd.
+# All Rights Reserved
+#
+#
+# File: application Makefile
+#
+# Build configurations
+
+#include	$(TOP)/.config
+
+DEBUG		= Y
+BUILD_SOURCE    = N
+
+####################################################################

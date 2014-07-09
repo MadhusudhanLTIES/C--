@@ -1,0 +1,12 @@
+#
+# Copyright (C) 2010-, Marvell International Ltd.
+# All Rights Reserved
+#
+#
+# File: application Makefile
+#
+# Build configurations
+
+DEBUG		= Y
+
+####################################################################
